@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-service
+  labels:
+    app: course-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: course-service
+  template:
+    metadata:
+      labels:
+        app: course-service
+    spec:
+      containers:
+      - name: course-service
+        image: azurepracticeinterview/course-service-image:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3002
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: mongo-secret
+        env:
+        - name: MONGO_URL
+          value: mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@$(MONGO_HOST):$(MONGO_PORT)/$(USER_DB) 

@@ -1,0 +1,5 @@
+rg_name = "qa-resource-group"
+location = "Central India"
+storage_account_name = "qasashivamaccount"
+access_tier = "Standard"
+account_replication_type = "LRS"

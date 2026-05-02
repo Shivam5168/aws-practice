@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  MONGO_HOST: mongo
+  MONGO_PORT: "27017"
+  USER_DB: userdb
+  COURSE_DB: coursedb
+  USER_PORT: "3001"
+  COURSE_PORT: "3002"

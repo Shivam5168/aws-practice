@@ -1,0 +1,6 @@
+rg_name = "dev-resource-group"
+location = "Central India"
+storage_account_name = "devsashivamaccount"
+access_tier = "Standard"
+account_replication_type = "LRS"
+env = "dev"
