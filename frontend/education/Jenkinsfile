@@ -1,0 +1,139 @@
+pipeline {
+
+    agent any
+
+    environment {
+
+        // Docker image name
+        DOCKER_IMAGE = "shivam312/education-app"
+
+        // Docker image tag
+        DOCKER_TAG = "v${BUILD_NUMBER}"
+
+        // Application path
+        APP_PATH = "frontend/education"
+    }
+
+    stages {
+
+        stage('Checkout Source Code') {
+
+            steps {
+
+                echo 'Cloning GitHub Repository...'
+
+                checkout scm
+            }
+        }
+
+        stage('Verify Project Files') {
+
+            steps {
+
+                echo 'Checking Files...'
+
+                bat "dir"
+
+                bat "dir ${APP_PATH}"
+            }
+        }
+
+        stage('Build Docker Image') {
+
+            steps {
+
+                echo 'Building Docker Image...'
+
+                bat """
+                docker build ^
+                -t ${DOCKER_IMAGE}:latest ^
+                -t ${DOCKER_IMAGE}:${DOCKER_TAG} ^
+                ./${APP_PATH}
+                """
+            }
+        }
+
+        stage('Docker Hub Login') {
+
+            steps {
+
+                echo 'Logging Into Docker Hub...'
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker-hub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+
+                    bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+
+            steps {
+
+                echo 'Pushing Docker Images...'
+
+                bat "docker push ${DOCKER_IMAGE}:latest"
+
+                bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            }
+        }
+    }
+
+    post {
+
+        success {
+
+            echo 'Pipeline Completed Successfully!'
+
+            echo "Docker Images Pushed:"
+            echo "${DOCKER_IMAGE}:latest"
+            echo "${DOCKER_IMAGE}:${DOCKER_TAG}"
+        }
+
+        failure {
+
+            echo 'Pipeline Failed'
+
+            echo 'Verify:'
+            echo '1. GitHub credentials'
+            echo '2. Docker Hub credentials'
+            echo '3. Docker Desktop running'
+            echo '4. Dockerfile exists'
+            echo '5. Correct repository path'
+        }
+
+        always {
+
+            echo 'Cleaning Workspace...'
+
+            script {
+
+                try {
+
+                    bat "docker logout"
+
+                } catch(Exception e) {
+
+                    echo "Docker logout skipped"
+                }
+
+                try {
+
+                    cleanWs()
+
+                } catch(Exception e) {
+
+                    echo "Workspace cleanup skipped"
+                }
+            }
+        }
+    }
+}
