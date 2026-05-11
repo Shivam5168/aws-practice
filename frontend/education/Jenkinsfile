@@ -4,14 +4,11 @@ pipeline {
 
     environment {
 
-        // Docker image name
+        APP_PATH = "frontend\\education"
+
         DOCKER_IMAGE = "shivam312/education-app"
 
-        // Docker image tag
         DOCKER_TAG = "v${BUILD_NUMBER}"
-
-        // Application path
-        APP_PATH = "frontend/education"
     }
 
     stages {
@@ -93,21 +90,12 @@ pipeline {
 
             echo 'Pipeline Completed Successfully!'
 
-            echo "Docker Images Pushed:"
-            echo "${DOCKER_IMAGE}:latest"
             echo "${DOCKER_IMAGE}:${DOCKER_TAG}"
         }
 
         failure {
 
             echo 'Pipeline Failed'
-
-            echo 'Verify:'
-            echo '1. GitHub credentials'
-            echo '2. Docker Hub credentials'
-            echo '3. Docker Desktop running'
-            echo '4. Dockerfile exists'
-            echo '5. Correct repository path'
         }
 
         always {
@@ -125,14 +113,7 @@ pipeline {
                     echo "Docker logout skipped"
                 }
 
-                try {
-
-                    cleanWs()
-
-                } catch(Exception e) {
-
-                    echo "Workspace cleanup skipped"
-                }
+                cleanWs()
             }
         }
     }
